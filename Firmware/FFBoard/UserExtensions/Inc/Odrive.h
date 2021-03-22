@@ -70,12 +70,12 @@ public:
 	void start();
 
 
-	/*int32_t getPos();
+	int32_t getPos();
 	void setPos(int32_t pos);
 
 
 	uint32_t getCpr(); // Encoder counts per rotation
-	void setCpr(uint32_t cpr);	// Encoder counts per rotation*/
+	void setCpr(uint32_t cpr);	// Encoder counts per rotation
 
 
 
@@ -91,7 +91,9 @@ private:
 	float pole_pairs = 4;
 	float torque_constant = 1.58; // [A/Nm]
 	OdrvMotorType motor_type = MOTOR_TYPE_GYMBAL;
-	int cpr = 40000;// [CPR]
+	uint32_t cpr = 40000;// [CPR]
+
+	float encoder_offset=0;
 
 	OdrvAxisState axis_state=AXIS_STATE_IDLE;
 
@@ -110,7 +112,7 @@ private:
 
 	void setTorque (float torque);
 
-	int sendUart (string msg);
+	void sendUart (string msg);
 
 	UART_HandleTypeDef *huart;
 

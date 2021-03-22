@@ -30,7 +30,7 @@ Odrive::~Odrive()
 }
 void Odrive::turn(int16_t power)
 {
-
+	this->setTorque(((float)power/2147483647.0)*5.0);
 }
 void Odrive::stop()
 {
@@ -50,12 +50,12 @@ void Odrive::start()
 
 	this->setAxisState(AXIS_STATE_FULL_CALIBRATION_SEQUENCE);
 
-	/*while(this->getAxisState()!= AXIS_STATE_IDLE)
+	while(this->getAxisState()!= AXIS_STATE_IDLE)
 	{
 		HAL_Delay(50);
 	}
 
-	this->setAxisState(AXIS_STATE_CLOSED_LOOP_CONTROL);*/
+	this->setAxisState(AXIS_STATE_CLOSED_LOOP_CONTROL);
 
 }
 
@@ -98,12 +98,14 @@ float  Odrive::getParam (string param)
 
 void Odrive::getFeedback (float* pos, float* vel)
 {
-	/*stringstream out;
-	out<<"f 0";
+	char out[3];
+	out[0]='F';
+	out[1]=' ';
+	out[2]='0';
 	HAL_UART_Transmit(huart, (uint8_t *) out, strlen(out), 20);
-	string in;
+	char in [64];
 	HAL_UART_Receive(huart, (uint8_t *)in, 128, 500);
-	sscanf(in,"%f %f", pos, vel);*/
+	sscanf(in,"%f %f", pos, vel);
 }
 
 void Odrive::setTorque (float torque)
@@ -124,7 +126,7 @@ OdrvControlMode  Odrive::getControlMode ()
 	return (OdrvControlMode) this->getParam("axis0.controller.config.control_mode");
 }
 
-int Odrive::sendUart (string msg)
+void Odrive::sendUart (string msg)
 {
 	char out[msg.length()];
 	for (int n=0; n<sizeof(out);n++)
@@ -132,6 +134,38 @@ int Odrive::sendUart (string msg)
 		out[n]=msg[n];
 	}
 	HAL_UART_Transmit(this->huart, (uint8_t *) out, strlen(out), 20);
+}
+
+/*int Odrive::receiveUart (string* msg)
+{
+	char in[128];
+	HAL_UART_Receive(huart, (uint8_t *)in, 128, 500);
+	for (int n=0; n<128;n++)
+	{
+		msg->[n]=in[n];
+	}
+}*/
+
+int32_t Odrive::getPos(){
+	float pos, vel;
+	this->getFeedback (&pos,&vel);
+	return (int32_t)2147483647*((pos+this->encoder_offset)-(int)(pos+this->encoder_offset));
+}
+void Odrive::setPos(int32_t pos){
+	float req_pos=(float)pos/2147483647;
+	float position, vel;
+	this->getFeedback (&position,&vel);
+	this->encoder_offset=position-req_pos;
+}
+
+
+uint32_t Odrive::getCpr()// Encoder counts per rotation
+{
+	return this->cpr;
+}
+void Odrive::setCpr(uint32_t cpr)// Encoder counts per rotation
+{
+	this->cpr=cpr;
 }
 
 #endif
