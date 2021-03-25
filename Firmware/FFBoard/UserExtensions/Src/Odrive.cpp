@@ -50,6 +50,7 @@ void Odrive::start()
 
 
 	this->getParam("axis0.current_state",(int*)&this->axis_state);
+	HAL_Delay(50);
 	int i=this->axis_state;
 
 	//this->setAxisState(AXIS_STATE_FULL_CALIBRATION_SEQUENCE);

@@ -86,7 +86,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		for(UartHandler* c : UartHandler::uartHandlers){
 			c->uartRcv((char*)uart_buf);
 		}
-		HAL_UART_Receive_IT(&UART_PORT,(uint8_t*)uart_buf,UART_BUF_SIZE);
+		HAL_UART_Receive_DMA (&huart1, (uint8_t*)uart_buf, UART_BUF_SIZE);
 	}
 }
 
