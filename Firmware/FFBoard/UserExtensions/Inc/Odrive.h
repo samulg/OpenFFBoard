@@ -56,7 +56,11 @@ enum OdrvInputMode  {INPUT_MODE_INACTIVE =0,
 };
 
 
-class Odrive: public MotorDriver,public Encoder,public CommandHandler{
+class Odrive:
+		public MotorDriver,
+		public Encoder,
+		public CommandHandler,
+		public UartHandler{
 public:
 	Odrive();
 	virtual ~Odrive();
@@ -83,7 +87,7 @@ public:
 
 private:
 
-
+	UartHandler uart;
 	float current_lim= 20; //[V] Volts because of motor_type
 	float vel_limit= 3; //[turns/s]
 	float calibration_current = 10; //[V] Volts because of motor_type
@@ -91,12 +95,28 @@ private:
 	float pole_pairs = 4;
 	float torque_constant = 1.58; // [A/Nm]
 	OdrvMotorType motor_type = MOTOR_TYPE_GYMBAL;
-	uint32_t cpr = 40000;// [CPR]
+	OdrvAxisState axis_state=AXIS_STATE_IDLE;
+	OdrvControlMode control_mode=CONTROL_MODE_TORQUE_CONTROL;
 
 	float encoder_offset=0;
+	float pos;
 
-	OdrvAxisState axis_state=AXIS_STATE_IDLE;
+	float * requested_f=0;
+	int* requested_i=0;
 
+	bool requested_pos =0;
+
+
+
+	template <class F> void received (F* var, F val){*var=val;};
+
+	template <class B>float getParam (string param, B* var );
+
+
+
+
+
+	EncoderType getType(){return EncoderType::incrementalIndex;}
 
 	void setAxisState(OdrvAxisState state);
 	OdrvAxisState getAxisState();
@@ -106,15 +126,16 @@ private:
 
 	void setParam (string param, int value);
 	void setParam (string param, float value);
-	float getParam (string param);
+	float getParam (string param, float* var);
+	int getParam (string param, int* var);
 
-	void getFeedback (float* pos, float* vel);
+	void getFeedback (float* pos);
 
 	void setTorque (float torque);
 
-	void sendUart (string msg);
+	void uartRcv(char* buf);
 
-	UART_HandleTypeDef *huart;
+	void toChar (string from, char *to);
 
 	bool active = false;
 

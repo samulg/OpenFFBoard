@@ -83,7 +83,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 		}
 
 		for(UartHandler* c : UartHandler::uartHandlers){
-			c->uartRcv((char*)uart_buf);
+			if (c-> huart == huart)
+				c->uartRcv((char*)uart_buf);
 		}
 	}
 }
