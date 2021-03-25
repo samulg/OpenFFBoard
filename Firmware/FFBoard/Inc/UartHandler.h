@@ -23,6 +23,7 @@ public:
 	virtual void uartRcv(char* buf);
 	void uartTX (string msg);
 	void setUart (UART_HandleTypeDef *huart);
+	void uartStartRx();
 };
 
 #endif /* UARTHANDLER_H_ */

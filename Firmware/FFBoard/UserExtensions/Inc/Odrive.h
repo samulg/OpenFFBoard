@@ -95,8 +95,10 @@ private:
 	float pole_pairs = 4;
 	float torque_constant = 1.58; // [A/Nm]
 	OdrvMotorType motor_type = MOTOR_TYPE_GYMBAL;
-	OdrvAxisState axis_state=AXIS_STATE_IDLE;
+	OdrvAxisState axis_state=AXIS_STATE_UNDEFINED;
 	OdrvControlMode control_mode=CONTROL_MODE_TORQUE_CONTROL;
+
+	bool active=0;
 
 	float encoder_offset=0;
 	float pos;
@@ -135,9 +137,9 @@ private:
 
 	void uartRcv(char* buf);
 
-	void toChar (string from, char *to);
+	//void toChar (string from, char *to);
 
-	bool active = false;
+	bool calibrated = false;
 
 
 };
