@@ -42,10 +42,11 @@ void cppmain() {
 			Error_Handler();
 		}
 	}
-	// Enable uart interrupt
+	/*// Enable uart interrupt
 	extern volatile char uart_buf[UART_BUF_SIZE];
 	//HAL_UART_Receive_IT(&UART_PORT,(uint8_t*)uart_buf,UART_BUF_SIZE);
-	HAL_UART_Receive_DMA (&huart1, (uint8_t*)uart_buf, UART_BUF_SIZE);
+	HAL_UART_Receive_DMA (&huart1, (uint8_t*)uart_buf, UART_BUF_SIZE);*/
+
 
 
 	mainclass = mainchooser.Create(main_id);

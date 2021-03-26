@@ -81,7 +81,7 @@ public:
 	uint32_t getCpr(); // Encoder counts per rotation
 	void setCpr(uint32_t cpr);	// Encoder counts per rotation
 
-
+	//EncoderType getType(){return EncoderType::incrementalIndex;}
 
 
 
@@ -108,17 +108,8 @@ private:
 
 	bool requested_pos =0;
 
-
-
-	template <class F> void received (F* var, F val){*var=val;};
-
-	template <class B>float getParam (string param, B* var );
-
-
-
-
-
-	EncoderType getType(){return EncoderType::incrementalIndex;}
+	//template <class F> void received (F* var, F val){*var=val;};
+	//template <class B>float getParam (string param, B* var );
 
 	void setAxisState(OdrvAxisState state);
 	OdrvAxisState getAxisState();
@@ -126,20 +117,20 @@ private:
 	void setControlMode (OdrvControlMode mode);
 	OdrvControlMode getControlMode ();
 
-	void setParam (string param, int value);
-	void setParam (string param, float value);
-	float getParam (string param, float* var);
-	int getParam (string param, int* var);
+	void setParam (char* param, int value);
+	//void setParam (string param, float value);
+	//float getParam (string param, float* var);
+	int getParam (char* param, int* var);
 
-	void getFeedback (float* pos);
-
+	void getFeedback (int32_t* pos);
 	void setTorque (float torque);
 
-	void uartRcv(char* buf);
-
-	//void toChar (string from, char *to);
-
+	bool isCalibrated ();
 	bool calibrated = false;
+
+	int counter=0;
+
+	int getChecksum(char*);
 
 
 };

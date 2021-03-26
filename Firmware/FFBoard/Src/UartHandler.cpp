@@ -7,13 +7,13 @@
 
 #include "UartHandler.h"
 #include "global_callbacks.h"
-std::vector<UartHandler*> UartHandler::uartHandlers;
+//std::vector<UartHandler*> UartHandler::uartHandlers;
 
 UartHandler::UartHandler() {
 }
 
 UartHandler::~UartHandler() {
-	removeCallbackHandler(uartHandlers, this);
+	//removeCallbackHandler(uartHandlers, this);
 }
 
 
@@ -24,16 +24,23 @@ void UartHandler::uartRcv(char* buf){
 
 void UartHandler::uartStartRx(){
 
-	addCallbackHandler(uartHandlers, this);
+	//addCallbackHandler(uartHandlers, this);
+
 }
 
-void UartHandler::uartTX (string msg){
-	char out[msg.length()];
-	for (int n=0; n<sizeof(out);n++)
+void UartHandler::uartTX (char* msg){
+	int msg_size=0;
+	while (msg[msg_size++]!= 0);
+	HAL_UART_Transmit(this->huart, (uint8_t *) msg, (uint16_t)msg_size, 20);
+}
+void UartHandler::uartRX (char * msg ){
+
+	HAL_UART_Receive(this->huart, (uint8_t *)this->inBuff, (uint16_t)UART_BUFF_SIZE, 20);
+	for (int n=0;n<UART_BUFF_SIZE || this->inBuff[n] != 0;n++)
 	{
-		out[n]=msg[n];
+		msg[n]=this->inBuff[n];
 	}
-	HAL_UART_Transmit(this->huart, (uint8_t *) out, strlen(out), 20);
+
 }
 void UartHandler::setUart (UART_HandleTypeDef *huart){
 	this->huart=huart;

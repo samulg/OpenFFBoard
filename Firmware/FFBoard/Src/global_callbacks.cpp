@@ -74,21 +74,21 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	}
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+/*void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	int i=0;
-	if(huart == &UART_PORT){
+	if(huart == &UART_PORT){*/
 		  // Received uart data
 		/*if(HAL_UART_Receive_IT(&UART_PORT,(uint8_t*)uart_buf,UART_BUF_SIZE) != HAL_OK){
 			pulseErrLed(); // Should never happen
 			return;
 		}*/
 
-		for(UartHandler* c : UartHandler::uartHandlers){
+		/*for(UartHandler* c : UartHandler::uartHandlers){
 			c->uartRcv((char*)uart_buf);
 		}
 		HAL_UART_Receive_DMA (&huart1, (uint8_t*)uart_buf, UART_BUF_SIZE);
 	}
-}
+}*/
 
 #ifdef CANBUS
 // CAN

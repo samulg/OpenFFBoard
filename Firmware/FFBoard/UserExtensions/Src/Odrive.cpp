@@ -22,14 +22,17 @@ const ClassIdentifier Odrive::getInfo(){
 Odrive::Odrive()
 {
 	this->setUart(&huart1);
-	this->uartStartRx();
+	//this->uartStartRx();
 }
 Odrive::~Odrive()
 {
 
 }
+
 void Odrive::turn(int16_t power)
 {
+	if(!this->isCalibrated())
+		return;
 	this->setTorque(((float)power/2147483647.0)*5.0);
 }
 void Odrive::stop()
@@ -49,9 +52,11 @@ void Odrive::start()
 	this->setParam("axis0.encoder.config.cpr", this->cpr);*/
 
 
-	this->getParam("axis0.current_state",(int*)&this->axis_state);
-	HAL_Delay(50);
-	int i=this->axis_state;
+	//this->getParam("axis0.current_state",(int*)&this->axis_state);
+	//this->getParam("axis0.encoder.coun_in_cpr",(int*)&this->axis_state);
+	this->setParam("axis0.requested_state", (int)AXIS_STATE_FULL_CALIBRATION_SEQUENCE);
+	//int pos=(int)this->axis_state;
+	//int i=this->axis_state;
 
 	//this->setAxisState(AXIS_STATE_FULL_CALIBRATION_SEQUENCE);
 	//this->setParam("axis0.requested_state", AXIS_STATE_FULL_CALIBRATION_SEQUENCE);
@@ -59,11 +64,15 @@ void Odrive::start()
 
 	/*while(1)
 	{
+		HAL_Delay(50);
+		refreshWatchdog();
+		HAL_Delay(50);
+		refreshWatchdog();
+		HAL_Delay(50);
 		refreshWatchdog();
 		HAL_Delay(50);
 		refreshWatchdog();
 		OdrvAxisState state=this->getAxisState();
-		int i;
 		if(state == AXIS_STATE_IDLE)
 		{
 			break;
@@ -72,9 +81,38 @@ void Odrive::start()
 
 	this->setAxisState(AXIS_STATE_CLOSED_LOOP_CONTROL);
 
-	this->calibrated=1;*/
+	this->calibrated=true;
+
+	bool cal=this->calibrated;*/
 
 }
+
+int32_t Odrive::getPos(){
+	if(!this->isCalibrated())
+			return 0;
+	int32_t pos;
+	this->getFeedback (&pos);
+	return pos+this->encoder_offset;
+}
+void Odrive::setPos(int32_t pos){
+	if(!this->isCalibrated())
+			return;
+	int32_t pos_odrive;
+	this->getFeedback (&pos_odrive);
+	this->encoder_offset=pos-pos_odrive;
+}
+uint32_t Odrive::getCpr()// Encoder counts per rotation
+{
+	return this->cpr;
+}
+void Odrive::setCpr(uint32_t cpr)// Encoder counts per rotation
+{
+	this->cpr=cpr;
+	if(!this->isCalibrated())
+			return;
+	this->setParam("axis0.encoder.config.cpr", (int)this->cpr);
+}
+
 
 void  Odrive::setAxisState(OdrvAxisState state)
 {
@@ -86,160 +124,124 @@ OdrvAxisState Odrive::getAxisState()
 	return this->axis_state;
 }
 
-void  Odrive::setParam (string param, int value)
-{
-	stringstream out;
-	out<< "w " << param <<" "<<value  << endl;
-	string out_temp=out.str();
-	this->uartTX(out_temp);
-}
-void  Odrive::setParam (string param, float value)
-{
-	stringstream out;
-	out<< "w " << param <<" "<<value  << endl;
-	string out_temp=out.str();
-	this->uartTX(out_temp);
-}
-float  Odrive::getParam (string param, float* var)
-{
-	stringstream out;
-	out<< "r " << param  << endl;
-	string out_temp=out.str();
-	this->uartTX(out_temp);
-	this->requested_f=var;
-	/*while (requested_f!=0)
-	{
-		HAL_Delay(50);
-		refreshWatchdog();
-	}*/
-	return *var;
-
-}
-int  Odrive::getParam (string param, int* var)
-{
-	stringstream out;
-	out<< "r " << param  << endl;
-	string out_temp=out.str();
-	this->uartTX(out_temp);
-	this->requested_i=var;
-	/*while (requested_i!=0)
-	{
-		HAL_Delay(50);
-		refreshWatchdog();
-	}*/
-	return* var;
-
-}
-/*void Odrive::toChar (string from, char *to)
-{
-	for(int n=0;n<from.size();n++)
-	{
-		to[n]=from[n];
-	}
-}*/
-
-void Odrive::getFeedback (float* pos)
-{
-	string out ="F 0";
-	this->uartTX(out);
-	this->requested_pos=1;
-	while (requested_pos == 0){
-		HAL_Delay(50);
-	}
-}
-
-void Odrive::setTorque (float torque)
-{
-	if (this->calibrated ==0)
-		return;
-	stringstream out;
-	out<< "c 0 " << torque << endl;
-	this->uartTX(out.str());
-}
-
 void Odrive::setControlMode (OdrvControlMode mode)
 {
 	this->setParam ("axis0.controller.config.control_mode", mode);
 }
-
 OdrvControlMode  Odrive::getControlMode ()
 {
-	return (OdrvControlMode) this->getParam("axis0.controller.config.control_mode", &this->control_mode);
+	return (OdrvControlMode) this->getParam("axis0.controller.config.control_mode", (int*)&this->control_mode);
 }
 
-/*void Odrive::sendUart (string msg)
+
+void  Odrive::setParam (char* param, int value)
 {
-	char out[msg.length()];
-	for (int n=0; n<sizeof(out);n++)
-	{
-		out[n]=msg[n];
-	}
-	HAL_UART_Transmit(this->huart, (uint8_t *) out, strlen(out), 20);
+	char msg[UART_BUFF_SIZE]={0};
+	/*stringstream out;
+	out<< "r " << param  << endl;
+	string out_temp=out.str();*/
+	sprintf(msg,"w %s %d\n", param, value);
+	char out[UART_BUFF_SIZE]={0};
+	sprintf(out,"%s *%d;\n",msg, this->getChecksum(msg));
+	this->uartTX(msg);
+}
+/*void  Odrive::setParam (string param, float value)
+{
+	stringstream out;
+	out<< "w " << param <<" "<<value  << endl;
+	string out_temp=out.str();
+	this->uartTX(out_temp);
 }*/
-
-/*int Odrive::receiveUart (string* msg)
+/*float  Odrive::getParam (string param, float* var)
 {
-	char in[128];
-	HAL_UART_Receive(huart, (uint8_t *)in, 128, 500);
-	for (int n=0; n<128;n++)
+	char msg[64]={0};
+	sprintf(msg,"r %s ", param);
+	char out[64];
+	sprintf(out,"%s*%d",msg, this->getChecksum(msg));
+	this->uartTX(out);
+	char in[64];
+	this->uartRX(in);
+	int in_checksum=0;
+	char msg_in[64];
+	sscanf(in, "%s*%d", msg_in, checksum);
+	if (checksum == this->getChecksum(msg_in))
 	{
-		msg->[n]=in[n];
+		*var=(float)msg_in;
+		return* var;
 	}
+	else
+		return 0;
+
 }*/
-void Odrive::uartRcv(char* buf)
+int  Odrive::getParam (char* param, int* var)
 {
-	float val1, val2;
-	int n_read=sscanf(buf, "%f %f", &val1, &val2); // @suppress("Float formatting support")
-	if(n_read==2)
+	char msg[UART_BUFF_SIZE]={0};
+	char in[UART_BUFF_SIZE]={0};
+	/*stringstream out;
+	out<< "r " << param  << endl;
+	string out_temp=out.str();*/
+	sprintf(msg,"r %s\n", param);
+	//char out[64]={0};
+	//sprintf(out,"%s *%d",msg, this->getChecksum(msg));
+	this->uartTX(msg);
+	this->uartRX(in);
+	/*int in_checksum=0;
+	char msg_in[64]={0};
+	int nread=sscanf(in, "%s *%d", msg_in, &in_checksum);
+	if (in_checksum == this->getChecksum(msg_in) && nread==2)
 	{
-		this->pos=val1;
-		requested_pos=0;
+		*var=(int)msg_in;
+		return* var;
 	}
-	else if (n_read==1)
+	else
+		return 0;*/
+	int n=0;
+	*var=(int)in;
+	return (int)in;
+
+
+}
+
+void Odrive::getFeedback (int32_t* pos)
+{
+	//this->getParam("axis0.encoder.armed_state", pos);
+	this->getParam("axis0.encoder.count_in_cpr",(int*) pos);
+	//this->getParam("axis0.current_state", (int*)pos);
+}
+void Odrive::setTorque (float torque)
+{
+	char out[32];
+	//out<< "c 0 " << torque << endl;
+	sprintf(out,"c 0 %f",torque);
+	this->uartTX(out);
+}
+
+bool Odrive::isCalibrated ()
+{
+	this->counter++;
+	if (this->calibrated ==0)
 	{
-		if (requested_f != 0 )
+		if(this->getAxisState()==AXIS_STATE_IDLE)
 		{
-			this->received(requested_f, val1);
-			requested_f=0;
+			this->setAxisState(AXIS_STATE_CLOSED_LOOP_CONTROL);
+			this->calibrated=true;
+			this->setTorque(0.5);
 		}
-		else if (requested_i!=0)
-		{
-			this->received(requested_i, (int)val1);
-			requested_i=0;
-		}
-		/*else_if (requested_ui!=0)
-		{
-			this->received(requested_ui, (uint32_t)val1);
-			requested_ui=0;
-		}*/
+		else
+			return false;
 	}
+	return true;
 }
 
-int32_t Odrive::getPos(){
-	if (this->calibrated ==0)
-			return 0;
-	float pos;
-	this->getFeedback (&pos);
-	return (int32_t)2147483647*((pos+this->encoder_offset)-(int)(pos+this->encoder_offset));
-}
-void Odrive::setPos(int32_t pos){
-	if (this->calibrated ==0)
-			return;
-	float req_pos=(float)pos/2147483647;
-	float position;
-	this->getFeedback (&position);
-	this->encoder_offset=position-req_pos;
-}
-
-
-uint32_t Odrive::getCpr()// Encoder counts per rotation
+int Odrive::getChecksum(char*msg)
 {
-	return this->cpr;
+	uint8_t checkSum = 0;
+	for (int n=0; msg[n]!=0;n++)
+	{
+		checkSum ^= msg[n];
+	}
+	return checkSum;
 }
-void Odrive::setCpr(uint32_t cpr)// Encoder counts per rotation
-{
-	this->cpr=cpr;
-	//this->setParam("axis0.encoder.config.cpr", (int)this->cpr);
-}
+
 
 #endif
