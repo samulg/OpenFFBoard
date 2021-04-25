@@ -25,8 +25,7 @@ void UartHandler::uartRcvLine(char* buf, uint8_t size){
 
 void UartHandler::uartRcvByte(char buf){
 
-<<<<<<< Updated upstream
-=======
+
 
 }
 
@@ -52,5 +51,4 @@ void UartHandler::uartTX (char* msg){
 }*/
 void UartHandler::setUart (UART_HandleTypeDef *huart){
 	this->huart=huart;
->>>>>>> Stashed changes
 }

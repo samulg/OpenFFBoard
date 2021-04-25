@@ -174,6 +174,10 @@ void  Odrive::setParam (char* param, float value)
 		return 0;
 
 }*/
+void  Odrive::rcv(char * msg)
+{
+
+}
 float  Odrive::getParam (char* param)
 {
 	char msg[32]={0};

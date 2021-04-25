@@ -43,7 +43,7 @@ volatile uint32_t ADC3_BUF[ADC3_CHANNELS] = {0};
 extern ADC_HandleTypeDef hadc3;
 #endif
 
-volatile char uart_buf[UART_BUF_SIZE] = {0};
+
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
@@ -74,7 +74,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	}
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+/*void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if(huart == &UART_PORT){
 		  // Received uart data
 		if(HAL_UART_Receive_IT(&UART_PORT,(uint8_t*)uart_buf,UART_BUF_SIZE) != HAL_OK){
@@ -86,27 +86,31 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 			c->uartRcv((char*)uart_buf);
 		}
 	}
-<<<<<<< Updated upstream
-=======
 }*/
+//TODO subir arriba y ordenar variables
+volatile uint8_t uart_buf[UART_BUF_SIZE];
+volatile uint8_t n_uartbuf=0;
+volatile uint8_t *uart_byte;
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   /* Prevent unused argument(s) compilation warning */
   UNUSED(huart);
-  c->uartRcvByte(uart_byte[0]);
-  if(n_uartbuf>=UART_BUF_SIZE)
-	  n_uartbuf=0;
-  uart_buf[n_uartbuf++]=uart_byte[0];
-  if(uart_byte[0]=='\n')
+  for(UartHandler* c : UartHandler::uartHandlers)
   {
-	  c->uartRcvLine((char*)uart_buf, n_uartbuf);
-	  for(int i=0; i<nuartbuf;i++)
+	  c->uartRcvByte(uart_byte[0]);
+	  if(n_uartbuf>=UART_BUF_SIZE)
+		  n_uartbuf=0;
+	  uart_buf[n_uartbuf++]=uart_byte[0];
+	  if(uart_byte[0]=='\n')
 	  {
-		  uart_buf[i]='\0';
+		  c->uartRcvLine((char*)uart_buf, n_uartbuf);
+		  for(int i=0; i<n_uartbuf;i++)
+		  {
+			  uart_buf[i]='\0';
+		  }
+		  n_uartbuf=0;
 	  }
-	  n_uartbuf=0;
   }
->>>>>>> Stashed changes
 }
 
 #ifdef CANBUS
