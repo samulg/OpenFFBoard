@@ -86,6 +86,27 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 			c->uartRcv((char*)uart_buf);
 		}
 	}
+<<<<<<< Updated upstream
+=======
+}*/
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(huart);
+  c->uartRcvByte(uart_byte[0]);
+  if(n_uartbuf>=UART_BUF_SIZE)
+	  n_uartbuf=0;
+  uart_buf[n_uartbuf++]=uart_byte[0];
+  if(uart_byte[0]=='\n')
+  {
+	  c->uartRcvLine((char*)uart_buf, n_uartbuf);
+	  for(int i=0; i<nuartbuf;i++)
+	  {
+		  uart_buf[i]='\0';
+	  }
+	  n_uartbuf=0;
+  }
+>>>>>>> Stashed changes
 }
 
 #ifdef CANBUS
