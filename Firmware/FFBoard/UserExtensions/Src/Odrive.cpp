@@ -54,7 +54,6 @@ void Odrive::start()
 
 	//this->getParam("axis0.current_state",(int*)&this->axis_state);
 	//this->getParam("axis0.encoder.coun_in_cpr",(int*)&this->axis_state);
-	this->uartStartRx();
 	this->setParam("axis0.requested_state", (int)AXIS_STATE_FULL_CALIBRATION_SEQUENCE);
 	//int pos=(int)this->axis_state;
 	//int i=this->axis_state;
@@ -225,7 +224,7 @@ bool Odrive::isCalibrated ()
 		{
 			this->setAxisState(AXIS_STATE_CLOSED_LOOP_CONTROL);
 			this->calibrated=true;
-			this->setTorque(1);
+			this->setTorque(0.5);
 		}
 		else
 			return false;
