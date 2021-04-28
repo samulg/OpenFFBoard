@@ -163,6 +163,9 @@ int main(void)
   HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, GPIO_PIN_SET);
   HAL_Delay(100);
 
+	extern uint8_t *uart_byte;
+	HAL_UART_Receive_DMA(&huart1, uart_byte,1 );
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

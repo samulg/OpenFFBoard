@@ -46,8 +46,7 @@ void cppmain() {
 	HAL_UART_Receive_IT(&UART_PORT,(uint8_t*)uart_buf,UART_BUF_SIZE);
 	HAL_UART_Receive_DMA (&huart1, (uint8_t*)uart_buf, UART_BUF_SIZE);*/
 
-	extern uint8_t *uart_byte;
-	HAL_UART_Receive_DMA(&huart1, uart_byte,1 );
+
 
 
 

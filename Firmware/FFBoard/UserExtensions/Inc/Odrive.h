@@ -130,7 +130,7 @@ private:
 	void setParam (char* param, float value);
 	//void setParam (string param, float value);
 	//float getParam (string param, float* var);
-	int getParam (char* param, int* var);
+	float getParam (char* param);
 
 	void getFeedback (int32_t* pos);
 	void setTorque (float torque);

@@ -121,8 +121,8 @@ void  Odrive::setAxisState(OdrvAxisState state)
 }
 OdrvAxisState Odrive::getAxisState()
 {
-	this->getParam("axis0.current_state", (int*)&this->axis_state);
-	return this->axis_state;
+	return (OdrvAxisState)this->getParam("axis0.current_state");
+
 }
 
 void Odrive::setControlMode (OdrvControlMode mode)
@@ -131,7 +131,7 @@ void Odrive::setControlMode (OdrvControlMode mode)
 }
 OdrvControlMode  Odrive::getControlMode ()
 {
-	return (OdrvControlMode) this->getParam("axis0.controller.config.control_mode", (int*)&this->control_mode);
+	return (OdrvControlMode) this->getParam("axis0.controller.config.control_mode");
 }
 
 
@@ -175,17 +175,14 @@ void  Odrive::setParam (char* param, float value)
 		return 0;
 
 }*/
-void  Odrive::rcv(char * msg)
-{
 
-}
 float  Odrive::getParam (char* param)
 {
 	char msg[32]={0};
 	sprintf(msg,"r %s \n", param);
 	float out;
 	this->requested=&out;
-	this->uarTX(msg);
+	this->uartTX(msg);
 	this->flag_req=1;
 	while(this->flag_req==1);
 	return out;
@@ -198,14 +195,15 @@ void Odrive::uartRcvLine(char* buf, uint8_t size)
 	{
 		return;
 	}
-	*this->requested=(float)buf;
+	*this->requested=atof(buf);
 	this->flag_req=0;
 }
 
 void Odrive::getFeedback (int32_t* pos)
 {
 	//this->getParam("axis0.encoder.armed_state", pos);
-	this->getParam("axis0.encoder.count_in_cpr",(int*) pos);
+	*pos=this->getParam("axis0.encoder.count_in_cpr");
+
 	//this->getParam("axis0.current_state", (int*)pos);
 }
 void Odrive::setTorque (float torque)

@@ -29,7 +29,7 @@ public:
 	virtual uint32_t getCpr(); // Encoder counts per rotation
 	virtual void setCpr(uint32_t cpr);	// Encoder counts per rotation
 
-private:
+protected:
 	uint32_t cpr = 0;
 };
 
