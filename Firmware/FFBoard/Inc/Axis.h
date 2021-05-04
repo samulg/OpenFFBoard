@@ -28,6 +28,8 @@
 #include "EffectsCalculator.h"
 #include "NormalizedAxis.h"
 
+#include "Odrive.h"
+
 
 struct Control_t {
 	bool emergency = false;
