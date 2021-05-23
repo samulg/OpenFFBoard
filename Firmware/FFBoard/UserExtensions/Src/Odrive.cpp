@@ -40,9 +40,9 @@ void Odrive::startMotor()
 
 	this->uartport->registerInterrupt();
 
-	char myTxData[]= "r axis0.current_state\n";
+	//char myTxData[]= "r axis0.current_state\n";
 	//HAL_UART_Transmit(&huart1, myTxData, 23, 20);
-	this->uartport->transmit(myTxData,sizeof(myTxData),1000);
+	//this->uartport->transmit(myTxData,sizeof(myTxData),1000);
 }
 
 void Odrive::uartRcv(char& buf)
@@ -53,7 +53,7 @@ void Odrive::uartRcv(char& buf)
 		if (this->requested_pos)
 		{
 			*this->requested_f=atof(buff);
-			this->requested_pos=0;
+			this->requested_pos=false;
 		}
 
 		//Borrado de buffer
@@ -68,12 +68,12 @@ void Odrive::uartRcv(char& buf)
 
 float Odrive::getPos_f()
 {
-	char myTxData[]= "r axis0.encoder.pos_estimate\n";
-	this->requested_pos=1;
+	char myTxData[]= "f 0\n";
+	this->requested_pos=true;
 	float var;
-	*this->requested_f=var;
+	this->requested_f=&var;
 	this->uartport->transmit(myTxData,sizeof(myTxData),1000);
-	while(this->requested_pos!=1);
+	while(this->requested_pos==true);
 	return var;
 
 }
