@@ -1,5 +1,5 @@
 /*
- * exampleMain.h
+ * TMCDebugBridge.h
  *
  *  Created on: 23.01.2020
  *      Author: Yannick
@@ -28,13 +28,16 @@ public:
 
 	static ClassIdentifier info;
 	const ClassIdentifier getInfo();
+	static bool isCreatable() {return true;};
 
 	void cdcRcv(char* Buf, uint32_t *Len);
 	ParseStatus command(ParsedCommand* cmd,std::string* reply);
+	std::string getHelpstring(){return "TMC Debug:torque,openloopspeed,pos,velocity,mode,reg\n";}
 
 
 private:
-	TMC4671* drv;
+	static void sendCdc(char* dat, uint32_t len);
+	std::unique_ptr<TMC4671> drv;
 	void tmcReadRegRaw(uint8_t reg,uint8_t* buf);
 	void tmcWriteReg(uint8_t reg,uint32_t dat);
 	SPI_HandleTypeDef* spi = &HSPIDRV;
