@@ -9,6 +9,9 @@
 #include "ClassChooser.h"
 #include "EncoderLocal.h"
 
+
+#include "Odrive.h"
+
 // 0-63 valid ids
 std::vector<class_entry<Encoder>> const Encoder::all_encoders =
 	{
@@ -16,6 +19,10 @@ std::vector<class_entry<Encoder>> const Encoder::all_encoders =
 #ifdef LOCALENCODER
 
 		add_class<EncoderLocal, Encoder>(),
+#endif
+#ifdef ODRIVE
+
+		add_class<Odrive, Encoder>(),
 #endif
 };
 
