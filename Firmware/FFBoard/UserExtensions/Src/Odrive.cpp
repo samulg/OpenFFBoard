@@ -4,46 +4,22 @@
 /*
  * Contains motor drivers based on Odrive
  */
+
+
+
 ClassIdentifier Odrive::info = {
 		 .name = "Odrive" ,
 		 .id=5
  };
+extern UARTPort external_uart;
 const ClassIdentifier Odrive::getInfo(){
 	return info;
 }
 
 Odrive::Odrive():
-		huart(UART_PORT_EXT)
+		UARTDevice(external_uart)
 {
-	//this->huart=new UARTPort (UART_PORT_EXT);
-	//this->huart.reservePort(UART_PORT_EXT);
-	//this->uartStartRx();
-	char myTxData[23]= "r axis0.current_state\n";
-		//HAL_UART_Transmit(&huart1, myTxData, 23, 20);
-		this->huart.transmit("w axis0.controller.input_torque 2",sizeof("w axis0.controller.input_torque 2"));
-		this->huart.transmit(myTxData,sizeof(myTxData));
 
-		while(1)
-		{
-			char *byte;
-			this->huart.receive(byte,1);
-			this->buff[this->buff_count++]=byte[0];
-			if(byte[0]=='\n')
-				{
-					uint8_t test=0;
-					//test= (uint8_t)buf[0];
-					int exuji;
-					exuji=test;
-
-					//Borrado de buffer
-					for (int i=0;i<this->buff_count ;i++)
-					{
-						this->buff[i]=0;
-					}
-					this->buff_count=0;
-				}
-
-		}
 }
 Odrive::~Odrive()
 {
@@ -54,15 +30,48 @@ void Odrive::turn(int16_t power)
 {
 
 }
-void Odrive::stop()
-{
-
+void  Odrive::stopMotor(){
 
 }
-void Odrive::start()
-{
+void  Odrive::startMotor(){
+	//this->huart=new UARTPort (UART_PORT_EXT);
+		//this->huart.reservePort(UART_PORT_EXT);
+		//this->uartStartRx();
+	this->uartport->reservePort(this);
+		char myTxData[23]= "r axis0.current_state\n";
+			//HAL_UART_Transmit(&huart1, myTxData, 23, 20);
+		this->uartport->transmit("w axis0.controller.input_torque 2",sizeof("w axis0.controller.input_torque 2"));
+		this->uartport->transmit(myTxData,sizeof(myTxData));
+
+			while(1)
+			{
+				char *byte;
+				this->uartport->receive(byte,1);
+				this->buff[this->buff_count++]=byte[0];
+				if(byte[0]=='\n')
+					{
+						uint8_t test=0;
+						//test= (uint8_t)buf[0];
+						int exuji;
+						exuji=test;
+
+						//Borrado de buffer
+						for (int i=0;i<this->buff_count ;i++)
+						{
+							this->buff[i]=0;
+						}
+						this->buff_count=0;
+					}
+
+			}
+}
+void  Odrive::emergencyStop(){
 
 }
+bool  Odrive::motorReady(){
+	return false;
+}
+
 
 /*void Odrive::uartRcv(char* buf)
 {

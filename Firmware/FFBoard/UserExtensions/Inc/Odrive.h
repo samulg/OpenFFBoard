@@ -12,14 +12,13 @@
 #include <Encoder.h>
 #include "cppmain.h"
 #include "CommandHandler.h"
-#include "UartHandler.h"
 #include "target_constants.h"
 #include "UART.h"
 
 class Odrive:
 		public MotorDriver,
-		public Encoder,
-		public UartHandler{
+		//public Encoder,
+		public UARTDevice{
 public:
 	Odrive();
 	virtual ~Odrive();
@@ -27,25 +26,29 @@ public:
 	static ClassIdentifier info;
 	const ClassIdentifier getInfo();
 
-
+//funciones heredadas virtuales de MotorDriver
 	void turn(int16_t power);
-	void stop();
-	void start();
+	void stopMotor();
+	void startMotor();
+	void emergencyStop();
+	bool motorReady();
 
+
+//funciones heredadas de Enconder
 	int32_t getPos();
 	void setPos(int32_t pos);
-
-
 	uint32_t getCpr(); // Encoder counts per rotation
 	void setCpr(uint32_t cpr);	// Encoder counts per rotation
-
 	EncoderType getType(){return EncoderType::incrementalIndex;};
+
+
+
 //	virtual void uartRcv(char* buf);
 private:
 	char buff[32]={0};
 	uint8_t buff_count=0;
 
-	UartHandler uart;
+	//UartHandler uart;
 
 	float * requested_f=0;
 	int* requested_i=0;
