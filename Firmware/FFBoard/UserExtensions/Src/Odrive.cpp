@@ -40,7 +40,7 @@ void  Odrive::startMotor(){
 	this->uartport->reservePort(this);
 		char myTxData[23]= "r axis0.current_state\n";
 			//HAL_UART_Transmit(&huart1, myTxData, 23, 20);
-		this->uartport->transmit("w axis0.controller.input_torque 2",sizeof("w axis0.controller.input_torque 2"));
+		this->uartport->transmit("w axis0.requested_state 3\n",sizeof("w axis0.requested_state 3\n"));
 		this->uartport->transmit(myTxData,sizeof(myTxData));
 
 			while(1)

@@ -17,7 +17,7 @@
 
 class Odrive:
 		public MotorDriver,
-		//public Encoder,
+		public Encoder,
 		public UARTDevice{
 public:
 	Odrive();
@@ -54,7 +54,7 @@ private:
 	int* requested_i=0;
 
 	bool requested_pos =0;
-	UARTPort huart;
+	//UARTPort huart;
 
 	//void setParam (char* param, int value);
 	//int getParam (char* param, int* var);
