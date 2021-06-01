@@ -131,6 +131,7 @@ static void MX_NVIC_Init(void);
   * @retval int
   */
 int main(void)
+
 {
   /* USER CODE BEGIN 1 */
 
