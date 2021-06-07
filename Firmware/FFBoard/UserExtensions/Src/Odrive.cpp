@@ -37,41 +37,18 @@ void  Odrive::startMotor(){
 	//this->huart=new UARTPort (UART_PORT_EXT);
 		//this->huart.reservePort(UART_PORT_EXT);
 		//this->uartStartRx();
-	this->uartport->reservePort(this);
-		char myTxData[23]= "r axis0.current_state\n";
+		this->uartport->reservePort(this);
+		//char myTxData[23]= "r axis0.current_state\n";
 			//HAL_UART_Transmit(&huart1, myTxData, 23, 20);
-		this->uartport->takeSemaphore();
-		this->uartport->transmit("w axis0.requested_state 3\n",sizeof("w axis0.requested_state 3\n"));
+		//this->uartport->takeSemaphore();
+		//this->uartport->transmit("w axis0.requested_state 3\n",sizeof("w axis0.requested_state 3\n"));
 		//this->uartport->transmit("w axis0.controller.input_torque 2\n",sizeof("w axis0.controller.input_torque 2\n"));
-		this->uartport->transmit(myTxData,sizeof(myTxData));
+		this->uartport->transmit("r axis0.current_state\n",sizeof("r axis0.current_state\n\n"),100);
+		HAL_Delay(100);
+		bool rcv=this->uartport->receive(this->buff,32,100);
 
-			while(1)
-			{
-				char *byte;
-				this->uartport->receive(byte,1);
-				this->buff[this->buff_count++]=byte[0];
-				if(byte[0]=='3');
-				{
-					this->uartport->giveSemaphore();
-					break;
-				}
-				/*if(byte[0]=='\n')
-				{
-					uint8_t test=0;
-					//test= (uint8_t)buf[0];
-					int exuji;
-					exuji=test;
-					//Borrado de buffer
-					for (int i=0;i<this->buff_count ;i++)
-					{
-						this->buff[i]=0;
-					}
-					this->buff_count=0;
-					this->uartport->giveSemaphore();
-					break;
-				}*/
-
-			}
+			int kk=7;
+			kk=rcv;
 
 }
 void  Odrive::emergencyStop(){
